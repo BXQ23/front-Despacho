@@ -1,0 +1,32 @@
+version: "3.9"
+
+# ══════════════════════════════════════════════════════════════════
+#  docker-compose.yml  —  EC2 Frontend (Innovatech Chile)
+#  Levanta: front-Despacho (React+Nginx en puerto 80)
+#
+#  Uso:
+#    docker compose up -d    # levantar
+#    docker compose down     # detener
+# ══════════════════════════════════════════════════════════════════
+
+services:
+
+  front-despacho:
+    image: ${DOCKERHUB_USERNAME}/front-despacho:latest
+    container_name: front_despacho
+    restart: unless-stopped
+    ports:
+      # Puerto 80 público → 8080 del contenedor (nginx sin root)
+      - "80:8080"
+    environment:
+      # La URL del backend se inyecta en tiempo de build (ARG en Dockerfile).
+      # En runtime, Nginx solo sirve archivos estáticos, por lo que
+      # las variables de entorno de Vite ya están baked en el bundle.
+      # Esta variable es solo informativa / para scripts de health check.
+      BACKEND_URL: ${BACKEND_URL}
+    networks:
+      - frontend_net
+
+networks:
+  frontend_net:
+    driver: bridge
